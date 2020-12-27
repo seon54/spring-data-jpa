@@ -12,7 +12,8 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
-import java.lang.reflect.Array;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,9 @@ public class MemberRepositoryTest {
     
     @Autowired
     TeamRepository teamRepository;
+
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     public void testMember() {
@@ -217,6 +221,38 @@ public class MemberRepositoryTest {
         assertThat(content.size()).isEqualTo(3);
         assertThat(slice.getNumber()).isEqualTo(0);
         assertThat(slice.isFirst()).isTrue();
+
+    }
+
+    @Test
+    public void bulkUpdate() {
+
+        // given
+        memberRepository.save((new Member("member1", 10)));
+        memberRepository.save((new Member("member2", 20)));
+        memberRepository.save((new Member("member3", 11)));
+        memberRepository.save((new Member("member4", 52)));
+        memberRepository.save((new Member("member5", 36)));
+
+        // when
+        int resultCount = memberRepository.bulkAgePlus(20);
+
+        List<Member> result1 = memberRepository.findByUsername("member5");
+        Member member = result1.get(0);
+
+        // update 적용되지 않음 (영속성 컨텍스트가 알지 못함)
+        System.out.println("member.getAge() = " + member.getAge());
+
+        // @Modifying(clearAutomatically = true) 없을 때는 영속성 초기화해야 변경 사항이 적용됨
+        // em.flush();   
+        // em.clear();  
+        
+        List<Member> result2 = memberRepository.findByUsername("member5");
+        Member member5 = result2.get(0);
+        System.out.println("member5.getAge() = " + member5.getAge());
+
+        // then
+        assertThat(resultCount).isEqualTo(3);
 
     }
     
