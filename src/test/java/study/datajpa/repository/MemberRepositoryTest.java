@@ -3,6 +3,10 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
@@ -173,6 +177,47 @@ public class MemberRepositoryTest {
         System.out.println("result4 = " + result4);
         System.out.println("result5 = " + result5);
 //        System.out.println("result6 = " + result6);
+    }
+
+    @Test
+    public void paging() {
+        // given
+        memberRepository.save((new Member("member1", 10)));
+        memberRepository.save((new Member("member2", 10)));
+        memberRepository.save((new Member("member3", 10)));
+        memberRepository.save((new Member("member4", 10)));
+        memberRepository.save((new Member("member5", 10)));
+
+        int age = 10;
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+        // when
+        Page<Member> page = memberRepository.findByAge(age, pageRequest);
+
+        // DTO (entity 직접 반환하지 말고 DTO로 변환 후, 반환)
+        Page<MemberDto> dto = page.map(member -> new MemberDto(member.getId(), member.getUsername(), member.getTeam().getName()));
+
+        // then
+        List<Member> members = page.getContent();
+        long totalCount = page.getTotalElements();
+        int totalPages = page.getTotalPages();
+
+        assertThat(members.size()).isEqualTo(3);
+        assertThat(totalCount).isEqualTo(5);
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(totalPages).isEqualTo(2);
+        assertThat(page.isFirst()).isTrue();
+        assertThat(page.hasNext()).isTrue();
+
+        // when
+        Slice<Member> slice = memberRepository.findSliceByAge(age, pageRequest);
+        List<Member> content = slice.getContent();
+
+        // then
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(slice.getNumber()).isEqualTo(0);
+        assertThat(slice.isFirst()).isTrue();
+
     }
     
 }
