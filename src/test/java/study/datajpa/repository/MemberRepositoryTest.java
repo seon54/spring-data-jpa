@@ -11,6 +11,7 @@ import study.datajpa.entity.Team;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -148,6 +149,30 @@ public class MemberRepositoryTest {
         }
 
     }
-    
+
+    @Test
+    public void testReturnType() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+        Member m3 = new Member("BBB", 20);
+
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+        memberRepository.save(m3);
+
+        List<Member> result1 = memberRepository.findListByUsername("AAA");
+        Member result2 = memberRepository.findMemberByUsername("AAA");
+        Optional<Member> result3 = memberRepository.findOptionalByUsername("AAA");
+        Member result4 = memberRepository.findMemberByUsername("CCC");  // 결과가 없을 때 null 반환
+        Optional<Member> result5 = memberRepository.findOptionalByUsername("CCC");  // 결과가 없을 때 Optional.empty
+//        Optional<Member> result6 = memberRepository.findOptionalByUsername("BBB");  IncorrectResultSizeDataAccessException
+
+        System.out.println("result1 = " + result1);
+        System.out.println("result2 = " + result2);
+        System.out.println("result3 = " + result3);
+        System.out.println("result4 = " + result4);
+        System.out.println("result5 = " + result5);
+//        System.out.println("result6 = " + result6);
+    }
     
 }
