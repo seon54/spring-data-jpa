@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
+import study.datajpa.entity.MemberProjection;
 
 import javax.persistence.LockModeType;
 import javax.persistence.QueryHint;
@@ -93,4 +94,12 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     List<UsernameOnly> findProjectionByUsername(@Param("username") String username);
 
     <T> List<T> findProjectionDtoByUsername(@Param("username") String username, Class<T> type);
+
+    @Query(value = "select * from member where username = ?", nativeQuery = true)
+    Member findByNativeQuery(String username);
+
+    @Query(value = "select m.member_id as id, m.username, t.name as teamName from member m left join team t",
+            nativeQuery = true,
+            countQuery = "select count(*) from member")
+    Page<MemberProjection> findByNativeProjection(Pageable pageable);
 }
