@@ -9,12 +9,14 @@ import java.util.List;
 import static lombok.AccessLevel.*;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor(access = PROTECTED)
 @ToString(of = {"id", "name"})
-public class Team {
+public class Team extends JpaBaseEntity {
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     @Column(name = "team_id")
     private Long id;
     private String name;
