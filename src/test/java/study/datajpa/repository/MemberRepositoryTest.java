@@ -480,4 +480,39 @@ public class MemberRepositoryTest {
 
         assertThat(result.get(0).getUsername()).isEqualTo("m1");
     }
+
+    @Test
+    public void projection() {
+        // given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        // when
+        List<UsernameOnly> result = memberRepository.findProjectionByUsername("m1");
+
+        for (UsernameOnly usernameOnly : result) {
+            System.out.println("usernameOnly = " + usernameOnly);
+        }
+
+        List<UsernameOnlyDto> result2 = memberRepository.findProjectionDtoByUsername("m1", UsernameOnlyDto.class);
+
+        for (UsernameOnlyDto usernameOnlyDto : result2) {
+            System.out.println("usernameOnlyDto = " + usernameOnlyDto);
+        }
+
+        List<NestedClosedProjection> result3 = memberRepository.findProjectionDtoByUsername("m1", NestedClosedProjection.class);
+
+        for (NestedClosedProjection projection : result3) {
+            System.out.println("getUsername = " + projection.getUsername());
+            System.out.println("getTeam = " + projection.getTeam());
+        }
+    }
 }
